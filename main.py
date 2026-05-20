@@ -40,10 +40,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  # Suppresses deprecation w
 # Bind the SQLAlchemy db instance (defined in models.py) to this Flask app.
 db.init_app(app)
 
-# Create all tables on startup
-with app.app_context():
-    db.create_all()
-
 # Flask-Login manages user sessions (login, logout, @login_required protection).
 login_manager = LoginManager(app)
 login_manager.login_view             = 'login'
@@ -75,10 +71,10 @@ def advance_renewal_date(sub):
     """
     if sub.auto_renew and sub.status == 'active' and sub.renewal_date <= date.today():
         if sub.billing_cycle == 'monthly':
-            while sub.renewal_date < date.today():
+            while sub.renewal_date <= date.today():
                 sub.renewal_date += relativedelta(months=1)
         else:
-            while sub.renewal_date < date.today():
+            while sub.renewal_date <= date.today():
                 sub.renewal_date += relativedelta(years=1)
 
 
@@ -172,7 +168,7 @@ class FreeTrialAddForm(FlaskForm):
     trial_type    = SelectField('Type',            choices=[('service', 'Service (recurring after trial)'), ('one_time', 'One-time purchase')])
     trial_days    = SelectField('Trial Duration',  choices=[('7', '7 days'), ('14', '14 days'), ('30', '30 days')])
     start_date    = DateField('Start Date',        validators=[DataRequired()])
-    cost_after    = FloatField('Cost after trial', validators=[NumberRange(min=0)], default=None)
+    cost_after    = FloatField('Cost after trial (type 0 if free)', validators=[DataRequired(), NumberRange(min=0)], default=0)
     reminder_days = SelectField('Remind me',       choices=REMINDER_CHOICES, default='3')
     submit        = SubmitField('Add Free Trial')
 
@@ -184,7 +180,7 @@ class FreeTrialEditForm(FlaskForm):
     trial_type    = SelectField('Type',            choices=[('service', 'Service (recurring after trial)'), ('one_time', 'One-time purchase')])
     trial_days    = SelectField('Trial Duration',  choices=[('7', '7 days'), ('14', '14 days'), ('30', '30 days')])
     start_date    = DateField('Start Date',        validators=[DataRequired()])
-    cost_after    = FloatField('Cost after trial', validators=[NumberRange(min=0)], default=None)
+    cost_after    = FloatField('Cost after trial (type 0 if free)', validators=[DataRequired(), NumberRange(min=0)], default=0)
     reminder_days = SelectField('Remind me',       choices=REMINDER_CHOICES)
     status        = SelectField('Status',          choices=[('active', 'Active'), ('canceled', 'Canceled'), ('converted', 'Converted')])
     submit        = SubmitField('Save Changes')
@@ -579,7 +575,7 @@ def add_free_trial():
             trial_days    = t_days,
             start_date    = start,
             expiry_date   = expiry,
-            cost_after    = form.cost_after.data if form.cost_after.data else None,
+            cost_after    = form.cost_after.data if form.cost_after.data > 0 else None,
             reminder_days = int(form.reminder_days.data)
         )
         db.session.add(new_trial)
@@ -615,7 +611,7 @@ def edit_free_trial(trial_id):
         trial.trial_days    = t_days
         trial.start_date    = form.start_date.data
         trial.expiry_date   = new_expiry
-        trial.cost_after    = form.cost_after.data if form.cost_after.data else None
+        trial.cost_after    = form.cost_after.data if form.cost_after.data > 0 else None
         trial.reminder_days = int(form.reminder_days.data)
         # Auto-restore to active if new expiry date is in the future
         if new_expiry > date.today():

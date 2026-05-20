@@ -369,7 +369,7 @@
             {% for task in tasks %}
             {% set days_left = (task.due_date - today).days %}
             <div class="acc-item
-                        {{ 'urgent' if task.status == 'pending' and days_left < 0 else '' }}
+                        {{ 'urgent' if task.status == 'pending' and days_left <= 0 else '' }}
                         {{ 'done'   if task.status == 'done' else '' }}"
                  id="acc-{{ task.id }}">
 
@@ -380,11 +380,11 @@
                     <span class="acc-field"><strong>Due:</strong> {{ task.due_date.strftime('%d/%m/%Y') }}</span>
                     {% if task.status == 'pending' and days_left >= 0 %}
                         <span class="acc-field"><strong>In:</strong> {{ days_left }} day{{ 's' if days_left != 1 else '' }}</span>
-                    {% elif task.status == 'pending' and days_left < 0 %}
+                    {% elif task.status == 'pending' and days_left <= 0 %}
                         <span class="acc-field"><strong>Overdue by</strong> {{ days_left | abs }} day{{ 's' if days_left | abs != 1 else '' }}</span>
                     {% endif %}
                     <!-- Status badge — overdue gets its own red badge -->
-                    {% if task.status == 'pending' and days_left < 0 %}
+                    {% if task.status == 'pending' and days_left <= 0 %}
                         <span class="status-badge status-overdue">Overdue</span>
                     {% else %}
                         <span class="status-badge status-{{ task.status }}">{{ task.status | capitalize }}</span>
@@ -401,7 +401,7 @@
                         </div>
                         <div class="col-12 col-md-6">
                             <p class="detail-row"><strong>Status:</strong>
-                                {% if task.status == 'pending' and days_left < 0 %}Overdue
+                                {% if task.status == 'pending' and days_left <= 0 %}Overdue
                                 {% else %}{{ task.status | capitalize }}{% endif %}
                             </p>
                             <p class="detail-row"><strong>Remind me:</strong> {{ task.reminder_days }} days before</p>
