@@ -40,6 +40,10 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  # Suppresses deprecation w
 # Bind the SQLAlchemy db instance (defined in models.py) to this Flask app.
 db.init_app(app)
 
+# Create all tables on startup
+with app.app_context():
+    db.create_all()
+
 # Flask-Login manages user sessions (login, logout, @login_required protection).
 login_manager = LoginManager(app)
 login_manager.login_view             = 'login'
