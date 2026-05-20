@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en" style="color-scheme: light;">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light">
+    <title>RemindME — General Tasks</title>
+
+    <!-- Elms Sans Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Elms+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+    <style>
+        /* ── CSS Variables ───────────────────────────────────────────────── */
+        :root {
+            --dark:      #5D576B;
+            --blue:      #0BA9EA;
+            --cyan:      #01E7EF;
+            --teal:      #17C3B2;
+            --bg-light:  #DCF5FA;
+            --card-bg:   #B9EDF7;
+            --white:     #ffffff;
+            --font:      'Elms Sans', sans-serif;
+        }
+
+        html { color-scheme: light only; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: var(--font);
+            background-color: #DCF5FA !important;
+            color: #5D576B !important;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── Navbar ──────────────────────────────────────────────────────── */
+        .navbar {
+            background-color: var(--bg-light);
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(93,87,107,0.08);
+        }
+        .navbar-brand img { height: 40px; width: auto; }
+        .nav-link {
+            font-family: var(--font);
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--dark) !important;
+            padding: 6px 16px !important;
+            transition: color 0.2s;
+        }
+        .nav-link:hover  { color: var(--blue) !important; }
+        .nav-link.active { color: var(--cyan) !important; }
+        .user-area { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+        .user-name { font-size: 0.9rem; font-weight: 600; color: var(--dark); }
+        .user-name i { color: var(--blue); margin-right: 4px; }
+        .btn-logout {
+            background-color: transparent;
+            color: var(--dark);
+            border: 1.5px solid var(--dark);
+            border-radius: 6px;
+            padding: 3px 16px;
+            font-family: var(--font);
+            font-weight: 600;
+            font-size: 0.82rem;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+        .btn-logout:hover { background-color: var(--dark); color: var(--white); }
+
+        /* ── Main ────────────────────────────────────────────────────────── */
+        main { flex: 1; padding: 50px 0 60px; }
+
+        .page-title {
+            font-size: 2.6rem;
+            font-weight: 800;
+            color: var(--dark);
+            text-align: center;
+            margin-bottom: 6px;
+        }
+        .page-subtitle {
+            font-size: 0.95rem;
+            font-weight: 300;
+            font-style: italic;
+            color: var(--blue);
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .btn-add {
+            background-color: var(--blue);
+            color: var(--white);
+            border: none;
+            border-radius: 8px;
+            padding: 8px 22px;
+            font-family: var(--font);
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-add:hover { background-color: #0990c8; color: var(--white); }
+
+        /* ── Accordion ───────────────────────────────────────────────────── */
+        .accordion-list { display: flex; flex-direction: column; gap: 12px; }
+
+        .acc-item {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .acc-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px 20px;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s;
+            flex-wrap: wrap;
+        }
+        .acc-header:hover { background-color: var(--card-bg); }
+
+        .acc-index {
+            background-color: var(--blue);
+            color: var(--white);
+            font-size: 0.85rem;
+            font-weight: 800;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .acc-field { font-size: 0.92rem; color: var(--dark); white-space: nowrap; }
+        .acc-field strong { font-weight: 700; }
+
+        /* Status badges */
+        .status-badge {
+            font-size: 0.75rem;
+            font-weight: 700;
+            border-radius: 20px;
+            padding: 2px 10px;
+            white-space: nowrap;
+        }
+        .status-pending  { background-color: var(--teal); color: var(--white); }
+        .status-done     { background-color: #9e9e9e;     color: var(--white); }
+        .status-overdue  { background-color: #e05c5c;     color: var(--white); }
+
+        /* Urgent highlight — overdue tasks */
+        .acc-item.urgent .acc-header { background-color: #fdecea; }
+        .acc-item.urgent .acc-field  { color: #c0392b; }
+        .acc-item.urgent .acc-index  { background-color: #e05c5c; }
+
+        /* Done task — muted appearance */
+        .acc-item.done .acc-header { opacity: 0.6; }
+
+        .acc-toggle {
+            margin-left: auto;
+            font-size: 1rem;
+            color: var(--dark);
+            transition: transform 0.25s;
+            flex-shrink: 0;
+        }
+        .acc-item.open .acc-toggle { transform: rotate(180deg); }
+
+        .acc-body {
+            display: none;
+            background-color: var(--card-bg);
+            padding: 20px 24px 24px;
+            border-top: 1px solid rgba(255,255,255,0.4);
+        }
+        .acc-item.open .acc-body { display: block; }
+
+        .detail-row { font-size: 0.92rem; color: var(--dark); margin-bottom: 6px; }
+        .detail-row strong { font-weight: 700; }
+
+        .acc-actions { margin-top: 18px; display: flex; gap: 10px; flex-wrap: wrap; }
+
+        .btn-edit {
+            background-color: var(--card-bg);
+            color: var(--blue);
+            border: 1.5px solid var(--blue);
+            border-radius: 7px;
+            padding: 6px 20px;
+            font-family: var(--font);
+            font-weight: 600;
+            font-size: 0.88rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-edit:hover { background-color: var(--blue); color: var(--white); }
+
+        /* Mark as Done button */
+        .btn-done {
+            background-color: var(--teal);
+            color: var(--white);
+            border: none;
+            border-radius: 7px;
+            padding: 7px 20px;
+            font-family: var(--font);
+            font-weight: 600;
+            font-size: 0.88rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-done:hover { background-color: #13a898; }
+
+        .btn-delete {
+            background-color: #e05c5c;
+            color: var(--white);
+            border: none;
+            border-radius: 7px;
+            padding: 7px 20px;
+            font-family: var(--font);
+            font-weight: 600;
+            font-size: 0.88rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-delete:hover { background-color: #c94b4b; }
+
+        /* ── Empty State ──────────────────────────────────────────────────── */
+        .empty-state { text-align: center; padding: 60px 20px; }
+        .empty-state i { font-size: 3.5rem; color: var(--cyan); margin-bottom: 14px; display: block; }
+        .empty-state p { font-size: 1rem; font-weight: 600; color: var(--dark); }
+        .empty-state span { font-size: 0.88rem; font-weight: 300; color: var(--blue); }
+
+        /* ── Modals ──────────────────────────────────────────────────────── */
+        .modal-content  { border-radius: 14px; border: none; }
+        .modal-header   { background-color: var(--cyan); border-radius: 14px 14px 0 0; border-bottom: none; padding: 20px 24px 16px; }
+        .modal-title    { font-weight: 800; font-size: 1.2rem; color: var(--white); }
+        .btn-close      { filter: brightness(0) invert(1); }
+        .modal-body     { padding: 24px; }
+        .form-label     { font-weight: 600; font-size: 0.9rem; color: var(--dark); margin-bottom: 4px; }
+        .form-control, .form-select {
+            border-radius: 7px;
+            border: 1.5px solid #cce8f0;
+            font-family: var(--font);
+            font-size: 0.93rem;
+            padding: 9px 13px;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: var(--cyan);
+            box-shadow: 0 0 0 3px rgba(1,231,239,0.15);
+        }
+        .btn-modal-submit {
+            width: 100%;
+            background-color: var(--blue);
+            color: var(--white);
+            border: none;
+            border-radius: 8px;
+            padding: 11px;
+            font-family: var(--font);
+            font-weight: 700;
+            font-size: 1rem;
+            margin-top: 6px;
+            transition: background 0.2s;
+            cursor: pointer;
+        }
+        .btn-modal-submit:hover { background-color: #0990c8; }
+        .field-error { color: #dc3545; font-size: 0.8rem; font-weight: 500; margin-top: 4px; }
+
+        /* ── Footer ──────────────────────────────────────────────────────── */
+        .site-footer {
+            background-color: var(--bg-light);
+            text-align: center;
+            padding: 22px 0;
+            font-size: 0.85rem;
+            color: var(--dark);
+            border-top: 1px solid rgba(93,87,107,0.1);
+        }
+        .site-footer span { font-weight: 700; }
+
+        /* ── Responsive ──────────────────────────────────────────────────── */
+        @media (max-width: 768px) {
+            .page-title { font-size: 1.8rem; }
+            .acc-field  { font-size: 0.78rem; }
+        }
+        @media (min-width: 1200px) {
+            .page-title { font-size: 2.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ── Navbar ───────────────────────────────────────────────────────────────── -->
+<nav class="navbar">
+    <div class="container d-flex justify-content-between align-items-center">
+        <a href="{{ url_for('dashboard') }}" class="navbar-brand">
+            <img src="{{ url_for('static', filename='img/logo.png') }}"
+                 alt="RemindME" height="40"
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <span style="display:none; font-size:1.4rem; font-weight:800; color:var(--dark);">Remind<span style="color:var(--cyan);">ME</span></span>
+        </a>
+
+        <div class="d-none d-lg-flex gap-2 align-items-center">
+            <a href="{{ url_for('subscriptions') }}"  class="nav-link">Subscriptions</a>
+            <a href="{{ url_for('free_trials') }}"    class="nav-link">Free Trials</a>
+            <a href="{{ url_for('general_tasks') }}"  class="nav-link active">General Tasks</a>
+        </div>
+
+        <div class="user-area">
+            <span class="user-name"><i class="bi bi-person-circle"></i>{{ current_user.name }}</span>
+            <a href="{{ url_for('logout') }}" class="btn-logout">Log out</a>
+        </div>
+
+        <button class="navbar-toggler d-lg-none border-0" type="button"
+                data-bs-toggle="collapse" data-bs-target="#mobileNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+    <div class="collapse navbar-collapse d-lg-none" id="mobileNav">
+        <div class="container py-2 d-flex flex-column gap-1">
+            <a href="{{ url_for('subscriptions') }}"  class="nav-link">Subscriptions</a>
+            <a href="{{ url_for('free_trials') }}"    class="nav-link">Free Trials</a>
+            <a href="{{ url_for('general_tasks') }}"  class="nav-link active">General Tasks</a>
+        </div>
+    </div>
+</nav>
+
+<!-- ── Flash Messages ────────────────────────────────────────────────────────── -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="container mt-3">
+            {% for category, message in messages %}
+                <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
+<!-- ── Main ─────────────────────────────────────────────────────────────────── -->
+<main>
+    <div class="container">
+
+        <h1 class="page-title">General Tasks</h1>
+        {% if tasks %}
+            <p class="page-subtitle">Keeping an eye on <strong>{{ tasks | selectattr('status', 'equalto', 'pending') | list | length }}</strong> pending task{{ 's' if tasks | selectattr('status', 'equalto', 'pending') | list | length != 1 else '' }} for you.</p>
+        {% else %}
+            <p class="page-subtitle">No tasks yet. Add one so you don't forget!</p>
+        {% endif %}
+
+        <!-- Add button -->
+        <div class="d-flex justify-content-end mb-3">
+            <button class="btn-add" data-bs-toggle="modal" data-bs-target="#addTaskModal">
+                Add <i class="bi bi-plus-lg"></i>
+            </button>
+        </div>
+
+        {% if tasks %}
+
+        <!-- ── Accordion List ──────────────────────────────────────────── -->
+        <div class="accordion-list">
+            {% for task in tasks %}
+            {% set days_left = (task.due_date - today).days %}
+            <div class="acc-item
+                        {{ 'urgent' if task.status == 'pending' and days_left < 0 else '' }}
+                        {{ 'done'   if task.status == 'done' else '' }}"
+                 id="acc-{{ task.id }}">
+
+                <!-- Header -->
+                <div class="acc-header" onclick="toggleAcc('{{ task.id }}')">
+                    <div class="acc-index">{{ loop.index }}</div>
+                    <span class="acc-field"><strong>Task:</strong> {{ task.title }}</span>
+                    <span class="acc-field"><strong>Due:</strong> {{ task.due_date.strftime('%d/%m/%Y') }}</span>
+                    {% if task.status == 'pending' and days_left >= 0 %}
+                        <span class="acc-field"><strong>In:</strong> {{ days_left }} day{{ 's' if days_left != 1 else '' }}</span>
+                    {% elif task.status == 'pending' and days_left < 0 %}
+                        <span class="acc-field"><strong>Overdue by</strong> {{ days_left | abs }} day{{ 's' if days_left | abs != 1 else '' }}</span>
+                    {% endif %}
+                    <!-- Status badge — overdue gets its own red badge -->
+                    {% if task.status == 'pending' and days_left < 0 %}
+                        <span class="status-badge status-overdue">Overdue</span>
+                    {% else %}
+                        <span class="status-badge status-{{ task.status }}">{{ task.status | capitalize }}</span>
+                    {% endif %}
+                    <i class="bi bi-chevron-down acc-toggle"></i>
+                </div>
+
+                <!-- Detail panel -->
+                <div class="acc-body">
+                    <div class="row">
+                        <div class="col-12 col-md-6">
+                            <p class="detail-row"><strong>Task:</strong> {{ task.title }}</p>
+                            <p class="detail-row"><strong>Due Date:</strong> {{ task.due_date.strftime('%d/%m/%Y') }}</p>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <p class="detail-row"><strong>Status:</strong>
+                                {% if task.status == 'pending' and days_left < 0 %}Overdue
+                                {% else %}{{ task.status | capitalize }}{% endif %}
+                            </p>
+                            <p class="detail-row"><strong>Remind me:</strong> {{ task.reminder_days }} days before</p>
+                            {% if task.notes %}
+                            <p class="detail-row" style="white-space:pre-wrap; word-break:break-word;"><strong>Notes:</strong> {{ task.notes }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="acc-actions">
+                        <!-- Mark as Done — only for pending tasks -->
+                        {% if task.status == 'pending' %}
+                        <form method="POST" action="{{ url_for('done_task', task_id=task.id) }}" style="display:inline;">
+                            <input type="hidden" name="csrf_token" value="{{ form_add.csrf_token._value() }}">
+                            <button type="submit" class="btn-done">
+                                <i class="bi bi-check-lg me-1"></i>Mark as Done
+                            </button>
+                        </form>
+                        {% endif %}
+
+                        <button class="btn-edit"
+                                onclick="openEditModal({{ task.id }}, '{{ task.title }}', '{{ task.due_date }}', {{ task.reminder_days }}, '{{ task.status }}', '{{ task.notes or '' }}')">
+                            <i class="bi bi-pencil-fill me-1"></i>Edit
+                        </button>
+
+                        <button class="btn-delete" onclick="openDeleteModal({{ task.id }}, '{{ task.title }}')">
+                            <i class="bi bi-trash me-1"></i>Delete
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+            {% endfor %}
+        </div>
+
+        {% else %}
+        <div class="empty-state">
+            <i class="bi bi-calendar-check"></i>
+            <p>No tasks yet.</p>
+            <span>Click "Add" to track your first task or deadline.</span>
+        </div>
+        {% endif %}
+
+    </div>
+</main>
+
+<!-- ── Footer ────────────────────────────────────────────────────────────────── -->
+<footer class="site-footer">
+    © 2026 All rights reserved — <span>RemindME</span> — Developed by <span>GToumb</span>
+</footer>
+
+
+<!-- ══════════════════════════════════════════════════════════════════════════════
+     ADD TASK MODAL
+════════════════════════════════════════════════════════════════════════════════ -->
+<div class="modal fade" id="addTaskModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Task</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="{{ url_for('add_task') }}">
+                    {{ form_add.hidden_tag() }}
+                    <div class="row g-3">
+                        <div class="col-12">
+                            {{ form_add.title.label(class="form-label") }}
+                            {{ form_add.title(class="form-control", placeholder="e.g. Renew car insurance") }}
+                            {% for error in form_add.title.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+                        </div>
+                        <div class="col-12 col-md-6">
+                            {{ form_add.due_date.label(class="form-label") }}
+                            {{ form_add.due_date(class="form-control") }}
+                            {% for error in form_add.due_date.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+                        </div>
+                        <div class="col-12 col-md-6">
+                            {{ form_add.reminder_days.label(class="form-label") }}
+                            {{ form_add.reminder_days(class="form-select") }}
+                        </div>
+                        <div class="col-12">
+                            {{ form_add.notes.label(class="form-label") }}
+                            {{ form_add.notes(class="form-control", placeholder="Optional notes (e.g. call Alpha first)", rows=2) }}
+                        </div>
+                    </div>
+                    <div class="mt-4">{{ form_add.submit(class="btn-modal-submit") }}</div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════════════════════
+     EDIT TASK MODAL
+     Pre-filled via openEditModal() JavaScript function.
+════════════════════════════════════════════════════════════════════════════════ -->
+<div class="modal fade" id="editTaskModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Task</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" id="editTaskForm" action="">
+                    {{ form_edit.hidden_tag() }}
+                    <div class="row g-3">
+                        <div class="col-12">
+                            {{ form_edit.title.label(class="form-label") }}
+                            {{ form_edit.title(class="form-control") }}
+                        </div>
+                        <div class="col-12 col-md-6">
+                            {{ form_edit.due_date.label(class="form-label") }}
+                            {{ form_edit.due_date(class="form-control") }}
+                        </div>
+                        <div class="col-12 col-md-6">
+                            {{ form_edit.reminder_days.label(class="form-label") }}
+                            {{ form_edit.reminder_days(class="form-select") }}
+                        </div>
+                        <div class="col-12 col-md-6">
+                            {{ form_edit.status.label(class="form-label") }}
+                            {{ form_edit.status(class="form-select") }}
+                        </div>
+                        <div class="col-12">
+                            {{ form_edit.notes.label(class="form-label") }}
+                            {{ form_edit.notes(class="form-control", rows=2) }}
+                        </div>
+                    </div>
+                    <div class="mt-4">{{ form_edit.submit(class="btn-modal-submit") }}</div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════════════════════
+     DELETE CONFIRMATION MODAL
+════════════════════════════════════════════════════════════════════════════════ -->
+<div class="modal fade" id="deleteTaskModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color:#e05c5c;">
+                <h5 class="modal-title">Delete Task</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p style="font-weight:600; color:var(--dark); margin-bottom:20px;">
+                    Are you sure you want to delete <span id="deleteTaskName" style="color:#e05c5c;"></span>?
+                    This action cannot be undone.
+                </p>
+                <form method="POST" id="deleteTaskForm" action="">
+                    <input type="hidden" name="csrf_token" value="{{ form_add.csrf_token._value() }}">
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn-modal-submit" style="background-color:#e05c5c;">
+                            <i class="bi bi-trash me-1"></i>Yes, delete it
+                        </button>
+                        <button type="button" class="btn-logout w-100 text-center" data-bs-dismiss="modal">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Bootstrap 5 JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    /* Accordion toggle — only one card open at a time. */
+    function toggleAcc(id) {
+        const clicked = document.getElementById('acc-' + id);
+        const isOpen  = clicked.classList.contains('open');
+        document.querySelectorAll('.acc-item.open').forEach(el => el.classList.remove('open'));
+        if (!isOpen) clicked.classList.add('open');
+    }
+
+    /* Pre-fill the Edit modal with the task's current values. */
+    function openEditModal(id, title, dueDate, reminderDays, status, notes) {
+        const form = document.getElementById('editTaskForm');
+        form.action = '/general-tasks/edit/' + id;
+        form.querySelector('[name="title"]').value         = title;
+        form.querySelector('[name="due_date"]').value      = dueDate;
+        form.querySelector('[name="reminder_days"]').value = reminderDays;
+        form.querySelector('[name="notes"]').value         = notes || '';
+        setSelect(form, 'status', status);
+        new bootstrap.Modal(document.getElementById('editTaskModal')).show();
+    }
+
+    /* Open delete confirmation modal. */
+    function openDeleteModal(id, title) {
+        document.getElementById('deleteTaskName').textContent = title;
+        document.getElementById('deleteTaskForm').action = '/general-tasks/delete/' + id;
+        new bootstrap.Modal(document.getElementById('deleteTaskModal')).show();
+    }
+
+    /* Helper — sets a <select> element to the given value. */
+    function setSelect(form, name, value) {
+        const sel = form.querySelector('[name="' + name + '"]');
+        if (sel) sel.value = value;
+    }
+
+    /* Re-open the correct modal if Flask returns a validation error. */
+    document.addEventListener('DOMContentLoaded', function () {
+        {% if show_add %}
+            new bootstrap.Modal(document.getElementById('addTaskModal')).show();
+        {% elif show_edit %}
+            new bootstrap.Modal(document.getElementById('editTaskModal')).show();
+        {% endif %}
+    });
+</script>
+
+</body>
+</html>
