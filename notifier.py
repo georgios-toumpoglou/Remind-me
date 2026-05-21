@@ -95,10 +95,10 @@ def build_email_body(user, notifications):
 
             <!-- Header -->
             <div style="background:#01E7EF; padding:28px 32px; text-align:center;">
-                <h1 style="margin:0; color:#5D576B; font-size:1.8rem; font-weight:800;">
-                    RemindME
-                </h1>
-                <p style="margin:6px 0 0; color:#5D576B; font-size:0.95rem;">
+                <img src="https://remindme-jmwy.onrender.com/static/img/logo.png"
+                     alt="RemindME" height="50"
+                     style="display:block; margin:0 auto 10px;">
+                <p style="margin:0; color:#5D576B; font-size:0.95rem;">
                     Daily Notifications
                 </p>
             </div>
@@ -126,7 +126,8 @@ def build_email_body(user, notifications):
                         border-top:1px solid rgba(93,87,107,0.1);">
                 <p style="margin:0; font-size:0.78rem; color:#5D576B; opacity:0.7;">
                     © 2026 RemindME — Developed by GToumb<br>
-                    You are receiving this email because you have an active RemindME account.
+                    You are receiving this email because you have an active RemindME account.<br>
+                    <span style="color:#e05c5c;">If you don't see future emails in your inbox, please check your spam folder.</span>
                 </p>
             </div>
 
