@@ -94,7 +94,7 @@ def build_email_body(user, notifications):
                     border-radius:16px; overflow:hidden; box-shadow:0 2px 12px rgba(0,0,0,0.08);">
 
             <!-- Header -->
-            <div style="background:#01E7EF; padding:28px 32px; text-align:center;">
+            <div style="background:#DCF5FA; padding:28px 32px; text-align:center;">
                 <img src="https://remindme-jmwy.onrender.com/static/img/logo.png"
                      alt="RemindME" height="50"
                      style="display:block; margin:0 auto 10px;">
